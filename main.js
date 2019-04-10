@@ -17,9 +17,9 @@
         init,
         testLocalStorage;
 
-    onDragStart = function (e) {
-        let boundingClientRect;
-        if (e.target.className.indexOf('bar') === -1) {
+    onDragStart = function (ev) {
+        var boundingClientRect;
+        if (ev.target.className.indexOf('bar') === -1) {
             return;
         }
 
@@ -27,21 +27,22 @@
 
         boundingClientRect = draggedEl.getBoundingClientRect();
 
-        grabPointY = boundingClientRect.top - e.clientY;
-        grabPointX = boundingClientRect.left - e.clientX;
+        grabPointY = boundingClientRect.top - ev.clientY;
+        grabPointX = boundingClientRect.left - ev.clientX;
+    };
 
-    }
-    onDrag = function (e) {
+    onDrag = function (ev) {
         if (!draggedEl) {
             return;
         }
 
-        let posX = e.clientX + grabPointX,
-            posY = e.clientY + grabPointY;
+        var posX = ev.clientX + grabPointX,
+            posY = ev.clientY + grabPointY;
 
         if (posX < 0) {
             posX = 0;
         }
+
         if (posY < 0) {
             posY = 0;
         }
@@ -53,28 +54,27 @@
         draggedEl = null;
         grabPointX = null;
         grabPointY = null;
-    }
+    };
 
     getNoteObject = function (el) {
-        let textarea = el.querySelector('textarea');
+        var textarea = el.querySelector('textarea');
         return {
             transformCSSValue: el.style.transform,
             content: textarea.value,
             id: el.id,
             textarea: {
                 width: textarea.style.width,
-                height: textarea.style.height
+                height: textarea.style.height,
             }
-        }
-    }
+        };
+    };
 
     onAddNoteBtnClick = function () {
         createNote();
-    }
+    };
 
     createNote = function (options) {
-
-        let stickerEl = document.createElement('div'),
+        var stickerEl = document.createElement('div'),
             barEl = document.createElement('div'),
             saveBtnEl = document.createElement('button'),
             deleteBtnEl = document.createElement('button'),
@@ -94,49 +94,46 @@
             textareaEl.style.resize = 'none';
         }
 
-        onDelete = function () {
-            deleteNote(
-                getNoteObject(stickerEl)
-            );
-            document.body.removeChild(stickerEl);
-        };
-
         onSave = function () {
             saveNote(
                 getNoteObject(stickerEl)
             );
         };
 
+        onDelete = function () {
+            deleteNote(
+                getNoteObject(stickerEl)
+            );
+
+            document.body.removeChild(stickerEl);
+        };
+
         stickerEl.style.transform = noteConfig.transformCSSValue;
         stickerEl.id = noteConfig.id;
         textareaEl.value = noteConfig.content;
 
-
-        saveBtnEl.addEventListener('click', onSave);
-        deleteBtnEl.addEventListener('click', onDelete);
-
         saveBtnEl.classList.add('saveButton');
+        saveBtnEl.addEventListener('click', onSave, false);
+
         deleteBtnEl.classList.add('deleteButton');
+        deleteBtnEl.addEventListener('click', onDelete, false);
 
-        let transformCSSValue = noteConfig.transformCSSValue;
-
-        stickerEl.style.transform = transformCSSValue;
         barEl.classList.add('bar');
         stickerEl.classList.add('sticker');
 
         barEl.appendChild(saveBtnEl);
         barEl.appendChild(deleteBtnEl);
 
-        stickerEl.append(barEl);
+        stickerEl.appendChild(barEl);
         stickerEl.appendChild(textareaEl);
 
         stickerEl.addEventListener('mousedown', onDragStart, false);
-        document.body.appendChild(stickerEl);
 
-    }
+        document.body.appendChild(stickerEl);
+    };
 
     testLocalStorage = function () {
-        const foo = "foo";
+        var foo = 'foo';
         try {
             localStorage.setItem(foo, foo);
             localStorage.removeItem(foo);
@@ -144,14 +141,12 @@
         } catch (e) {
             return false;
         }
-    }
-
-
+    };
 
     init = function () {
 
-        if (!testLocalStorage()) {
-            let message = "We are sorry, but you cannot use localStorage";
+        if (!testLocalStorage) {
+            var message = "We are sorry but you cannot use localStorage";
             saveNote = function () {
                 console.warn(message);
             };
@@ -160,19 +155,16 @@
                 console.warn(message);
             };
         } else {
-
             saveNote = function (note) {
                 localStorage.setItem(note.id, JSON.stringify(note));
-                // tutaj zapisze notatke
             };
 
             deleteNote = function (note) {
                 localStorage.removeItem(note.id);
-                // usuwamy konkretną notatkę
             };
 
             loadNotes = function () {
-                for (let i = 0; i < localStorage.length; i++) {
+                for (var i = 0; i < localStorage.length; i++) {
                     var noteObject = JSON.parse(
                         localStorage.getItem(
                             localStorage.key(i)
@@ -182,17 +174,14 @@
                 };
             };
             loadNotes();
-        };
+        }
 
         addNoteBtnEl = document.querySelector('.addNoteBtn');
         addNoteBtnEl.addEventListener('click', onAddNoteBtnClick, false);
         document.addEventListener('mousemove', onDrag, false);
         document.addEventListener('mouseup', onDragEnd, false);
-    }
+    };
+
     init();
-    // createNote();
-
-
-
 
 })();
